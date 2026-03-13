@@ -9,11 +9,37 @@
 </head>
 <body>
 
-  <h2 id="username">กำลังโหลด...</h2>
+  <div class="layout">
 
-  <button>เข้าร่วมรอบวันนี้</button>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h2>GM</h2>
+        <p>Badminton Manager</p>
+      </div>
+
+      <ul class="menu">
+        <li class="active">รายชื่อ</li>
+        <li>จัดก๊วน</li>
+        <li>ลูกแบด</li>
+        <li>ประวัติ</li>
+        <li>ชำระเงิน</li>
+      </ul>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <h2 id="username">กำลังโหลด...</h2>
+
+      <div id="memberList"></div>
+
+      <button class="floating-btn">+</button>
+    </div>
+
+  </div>
 
   <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/liff-init.js"></script>
   <script src="js/user.js"></script>
 
