@@ -1,107 +1,91 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const profile = await initLiff();
-  if (!profile) return;
+let currentUser = null;
 
-  document.getElementById("username").innerText =
-    "สวัสดี " + profile.displayName;
+document.addEventListener("DOMContentLoaded", function(){
 
-  const result = await apiCall("checkUser", {
-    userId: profile.userId
+  liff.init({ liffId: CONFIG.LIFF_ID })
+  .then(() => {
+
+    if (!liff.isLoggedIn()) {
+      liff.login({ redirectUri: window.location.href });
+      return;
+    }
+
+    return liff.getProfile();
+  })
+  .then(profile => {
+
+    if(!profile) return;
+
+    currentUser = profile;
+
+    document.body.style.display = "block";
+
+    document.getElementById("username").innerText =
+      "สวัสดี " + profile.displayName;
+
+    checkUser(profile.userId);
   });
 
-  if (!result.exists) {
-  showRegisterForm(profile);
-  return;
-}
-
-  // โหลดหน้าแรก
-  loadPage("members", document.querySelector(".menu li"));
 });
 
+function checkUser(userId){
 
-// ================= ROUTER =================
+  fetch(CONFIG.API_URL, {
+    method:"POST",
+    body: JSON.stringify({
+      action:"checkUser",
+      userId:userId
+    })
+  })
+  .then(r=>r.json())
+  .then(res=>{
 
-function loadPage(page, el) {
+    if(!res.exists){
+      registerLineUser(currentUser);
+      showRegisterForm(currentUser);
+    }else{
+      loadPage("members", document.querySelector(".menu li"));
+    }
 
-  document.querySelectorAll(".menu li").forEach(li => {
-    li.classList.remove("active");
   });
 
-  if (el) el.classList.add("active");
-
-  if (page === "members") loadMembersPage();
-  if (page === "session") loadSessionPage();
-  if (page === "shuttle") loadShuttlePage();
-  if (page === "history") loadHistoryPage();
-  if (page === "payment") loadPaymentPage();
 }
 
+function registerLineUser(profile){
 
-// ================= MEMBERS PAGE =================
-
-async function loadMembersPage() {
-
-  const res = await apiCall("getUsers");
-
-  let html = `<h2>รายชื่อสมาชิก</h2>`;
-
-  res.users.forEach(user => {
-    html += `
-      <div class="member-card">
-        <h3>${user.nickName}</h3>
-        <p>ชื่อจริง: ${user.realName}</p>
-        <p>ระดับ: ${user.level}</p>
-        <p>คะแนน: ${user.point}</p>
-      </div>
-    `;
+  fetch(CONFIG.API_URL,{
+    method:"POST",
+    body: JSON.stringify({
+      action:"registerLineUser",
+      userId: profile.userId,
+      lineDisplayName: profile.displayName,
+      linePictureUrl: profile.pictureUrl
+    })
   });
 
-  document.getElementById("pageContent").innerHTML = html;
-}
-
-
-// ================= OTHER PAGES =================
-
-function loadSessionPage() {
-  document.getElementById("pageContent").innerHTML = `
-    <h2>หน้าจัดก๊วน</h2>
-  `;
-}
-
-function loadShuttlePage() {
-  document.getElementById("pageContent").innerHTML = `
-    <h2>หน้าลูกแบด</h2>
-  `;
-}
-
-function loadHistoryPage() {
-  document.getElementById("pageContent").innerHTML = `
-    <h2>หน้าประวัติ</h2>
-  `;
-}
-
-function loadPaymentPage() {
-  document.getElementById("pageContent").innerHTML = `
-    <h2>หน้าชำระเงิน</h2>
-  `;
 }
 
 function showRegisterForm(profile) {
 
   document.getElementById("pageContent").innerHTML = `
   
-  <h2>สมัครสมาชิก</h2>
+  <h2>สมัครสมาชิกครั้งแรก</h2>
 
   <div class="card">
 
-    <input id="nickName" placeholder="ชื่อเล่น">
+    <label>ชื่อเล่น</label>
+    <input id="nickName">
 
-    <input id="realName" placeholder="ชื่อจริง">
+    <label>ชื่อจริง</label>
+    <input id="realName">
 
-    <input id="phone" placeholder="เบอร์โทร">
+    <label>เบอร์โทรศัพท์</label>
+    <input id="phone">
 
+    <label>วันเกิด</label>
     <input id="birthday" type="date">
 
+    <label>ระดับมือ</label>
     <select id="level">
       <option value="Beginner">Beginner</option>
       <option value="P">P</option>
@@ -109,32 +93,37 @@ function showRegisterForm(profile) {
       <option value="S">S</option>
     </select>
 
-    <button onclick="registerUser()">สมัครสมาชิก</button>
+    <button onclick="registerUser()" class="btn-primary">
+      บันทึกข้อมูล
+    </button>
 
   </div>
   `;
 }
-async function registerUser() {
 
-  const profile = await liff.getProfile();
+function registerUser(){
 
-  const data = {
-    action: "registerUser",
-    userId: profile.userId,
-    lineDisplayName: profile.displayName,
-    linePictureUrl: profile.pictureUrl,
-    nickName: document.getElementById("nickName").value,
-    realName: document.getElementById("realName").value,
-    phone: document.getElementById("phone").value,
-    birthday: document.getElementById("birthday").value,
-    level: document.getElementById("level").value
-  };
+  fetch(CONFIG.API_URL,{
+    method:"POST",
+    body: JSON.stringify({
+      action:"registerUser",
+      userId: currentUser.userId,
+      lineDisplayName: currentUser.displayName,
+      linePictureUrl: currentUser.pictureUrl,
+      nickName: document.getElementById("nickName").value,
+      realName: document.getElementById("realName").value,
+      phone: document.getElementById("phone").value,
+      birthday: document.getElementById("birthday").value,
+      level: document.getElementById("level").value
+    })
+  })
+  .then(res=>res.json())
+  .then(res=>{
 
-  const query = new URLSearchParams(data).toString();
+    alert("สมัครสมาชิกสำเร็จ 🎉");
 
-  await fetch(CONFIG.API_URL + "?" + query);
+    loadPage("members", document.querySelector(".menu li"));
 
-  alert("สมัครสำเร็จ");
+  });
 
-  location.reload();
 }
