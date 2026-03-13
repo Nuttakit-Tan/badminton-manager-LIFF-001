@@ -1,11 +1,13 @@
-async function apiCall(action, data = {}) {
-  const response = await fetch(CONFIG.API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action,
-      ...data
-    })
-  });
+async function apiCall(action, params = {}) {
 
-  return await response.json();
+  const query = new URLSearchParams({
+    action,
+    ...params
+  }).toString();
+
+  const url = CONFIG.API_URL + "?" + query;
+
+  const res = await fetch(url);
+
+  return await res.json();
 }

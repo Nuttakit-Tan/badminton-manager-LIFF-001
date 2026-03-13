@@ -68,3 +68,31 @@ body {
   border-radius: 50%;
   cursor: pointer;
 }
+
+.menu li.active {
+  background: rgba(255,255,255,0.3);
+  border-radius: 8px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+}
+
+.card input,
+.card select {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+}
+
+.card button {
+  background: #E07A5F;
+  border: none;
+  padding: 10px;
+  color: white;
+  width: 100%;
+  border-radius: 6px;
+}
