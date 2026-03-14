@@ -1,25 +1,37 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #F4F1EE;
+  background: #f4f1ee;
 }
 
-.layout {
-  display: flex;
-  height: 100vh;
-}
-
-/* Sidebar */
 .sidebar {
   width: 220px;
-  background: #E07A5F;
+  background: #e07a5f;
   color: white;
   padding: 20px;
+  position: fixed; /* เพิ่ม */
+  top: 0; /* เพิ่ม */
+  left: 0; /* เพิ่ม */
+  height: 100vh; /* เพิ่ม */
+  z-index: 10; /* เพิ่ม */
+  transition: transform 0.3s ease;
 }
 
 .logo {
   text-align: center;
-  margin-bottom: 30px;
+  padding: 20px 10px;
+}
+
+.sidebar-logo {
+  width: 105px; /* 🔥 โลโก้ใหญ่ขึ้น */
+  height: 105px;
+  object-fit: contain;
+
+  background: #ffffff; /* 🔥 วงกลมสีขาว */
+  border-radius: 50%;
+
+  padding: 9px; /* 🔥 วงกลมเล็กลง */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 .menu {
@@ -35,14 +47,15 @@ body {
 
 .menu li.active,
 .menu li:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Content */
 .content {
   flex: 1;
-  padding: 30px;
+  padding: 40px 24px;
   overflow-y: auto;
+  margin-left: 0; /* ✅ แก้ตรงนี้ */
+  transition: all 0.3s ease; /* ปรับให้ smooth */
 }
 
 /* Card */
@@ -51,7 +64,7 @@ body {
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 /* Floating Button */
@@ -59,7 +72,7 @@ body {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  background: #E07A5F;
+  background: #e07a5f;
   color: white;
   border: none;
   font-size: 22px;
@@ -70,29 +83,192 @@ body {
 }
 
 .menu li.active {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 8px;
 }
 
 .card {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  width: 300px;
+  padding: 30px 24px; /* 👈 เปลี่ยนจาก 25 */
+  border-radius: 18px; /* 👈 เพิ่มความโค้ง */
+  max-width: 260px;
+  width: 100%;
+  margin: 40px auto; /* 👈 เพิ่มระยะบนล่าง */
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.06);
 }
 
 .card input,
 .card select {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
+  width: 85%;
+  margin-bottom: 18px; /* 👈 เพิ่ม */
+  padding: 14px; /* 👈 เพิ่ม */
+  border-radius: 12px; /* 👈 เพิ่ม */
+  border: 1px solid #ddd;
+  font-size: 15px; /* 👈 เพิ่ม */
 }
 
 .card button {
-  background: #E07A5F;
+  background: #e07a5f;
   border: none;
-  padding: 10px;
+  padding: 14px;
   color: white;
   width: 100%;
-  border-radius: 6px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.card button:hover {
+  opacity: 0.9;
+}
+
+.register-title {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: none;
+  z-index: 5;
+}
+
+.overlay.show {
+  display: block;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.menu-btn {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 2000;
+
+  background: #ffffff;
+  color: #e07a5f;
+
+  border: none;
+  font-size: 22px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+  display: block; /* ✅ ให้แสดงทุกขนาด */
+}
+
+@media (max-width: 767px) {
+  .content {
+    padding: 30px 20px; /* 👈 สำคัญ */
+  }
+}
+
+.loading {
+  position: fixed;
+  inset: 0;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-logo {
+  width: 130px;
+  margin-bottom: 30px;
+  animation: fadeIn 0.6s ease-in-out;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.08));
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dot Loader */
+.dot-loader {
+  display: flex;
+  gap: 8px;
+}
+
+.dot-loader span {
+  width: 10px;
+  height: 10px;
+  background: #e07a5f;
+  border-radius: 50%;
+  animation: bounce 0.6s infinite alternate;
+}
+
+.dot-loader span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot-loader span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  from {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  to {
+    transform: translateY(-8px);
+    opacity: 1;
+  }
+}
+
+.content.fade-out {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.25s ease;
+}
+
+.content.fade-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.25s ease;
+}
+
+.error-text {
+  color: #e53935;
+  font-size: 13px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+.input-error {
+  border: 1px solid #e53935 !important;
 }

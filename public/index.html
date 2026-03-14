@@ -1,29 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Badminton Manager</title>
-
-    <style>
-    body { display: none; }
-  </style>
 
   <link rel="stylesheet" href="css/style.css">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
+  
+<div id="loadingScreen" class="loading">
+  <div class="loading-content">
+    <img src="images/logo.png" class="loading-logo" />
+    <div class="dot-loader">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</div>
+<div id="overlay" class="overlay"></div>
 
   <div class="layout">
 
     <!-- Sidebar -->
     <div class="sidebar">
       <div class="logo">
-        <h2>GM</h2>
-        <p>Badminton Manager ครั้งที่ 2</p>
-      </div>
+  <img src="images/logo.png" class="sidebar-logo" />
+  <p>Badminton Manager ทดสอบครั้งที่ 15</p>
+</div>
 
       <ul class="menu">
-  <li onclick="loadPage('members', this)" class="active">รายชื่อ</li>
+  <li id="menuMembers" onclick="loadPage('members', this)">รายชื่อ</li>
   <li onclick="loadPage('session', this)">จัดก๊วน</li>
   <li onclick="loadPage('shuttle', this)">ลูกแบด</li>
   <li onclick="loadPage('history', this)">ประวัติ</li>
@@ -31,8 +39,10 @@
 </ul>
     </div>
 
-    <!-- Content -->
-    <div class="content">
+<div class="content">
+
+  <button id="menuToggle" class="menu-btn">☰</button>
+
   <h2 id="username">กำลังโหลด...</h2>
 
   <!-- ตรงนี้สำคัญ -->
@@ -46,7 +56,9 @@
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/liff-init.js"></script>
+  <script src="js/page.js"></script> 
   <script src="js/user.js"></script>
+  
 
 </body>
 </html>

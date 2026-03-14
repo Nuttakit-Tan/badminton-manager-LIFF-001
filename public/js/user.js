@@ -1,129 +1,234 @@
 let currentUser = null;
+let mustCompleteProfile = false;
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("loadingScreen").style.display = "flex";
 
-  liff.init({ liffId: CONFIG.LIFF_ID })
-  .then(() => {
+  liff
+    .init({ liffId: CONFIG.LIFF_ID })
+    .then(() => {
+      if (!liff.isLoggedIn()) {
+        liff.login({ redirectUri: window.location.href });
+        return;
+      }
 
-    if (!liff.isLoggedIn()) {
-      liff.login({ redirectUri: window.location.href });
-      return;
-    }
+      return liff.getProfile();
+    })
+    .then((profile) => {
+      if (!profile) return;
 
-    return liff.getProfile();
-  })
-  .then(profile => {
+      currentUser = profile;
 
-    if(!profile) return;
+      setTimeout(() => {
+        setupSidebar();
+      }, 0);
 
-    currentUser = profile;
+      document.getElementById("username").innerText =
+        "สวัสดีคุณ " + profile.displayName;
 
-    document.body.style.display = "block";
-
-    document.getElementById("username").innerText =
-      "สวัสดี " + profile.displayName;
-
-    checkUser(profile.userId);
-  });
-
+      checkUser(profile.userId);
+    });
 });
 
-function checkUser(userId){
-
+function checkUser(userId) {
   fetch(CONFIG.API_URL, {
-    method:"POST",
+    method: "POST",
     body: JSON.stringify({
-      action:"checkUser",
-      userId:userId
-    })
+      action: "checkUser",
+      userId: userId,
+    }),
   })
-  .then(r=>r.json())
-  .then(res=>{
+    .then((r) => r.json())
+    .then((res) => {
+      if (!res.exists) {
+        mustCompleteProfile = true;
+        registerLineUser(currentUser);
+        showRegisterForm(currentUser);
+      } else {
+        if (!res.isComplete) {
+          mustCompleteProfile = true;
+          showRegisterForm(currentUser);
+        } else {
+          mustCompleteProfile = false;
 
-    if(!res.exists){
-      registerLineUser(currentUser);
-      showRegisterForm(currentUser);
-    }else{
-      loadPage("members", document.querySelector(".menu li"));
-    }
+          if (res.role === "admin") {
+            loadPage("members", document.getElementById("menuMembers"));
+          } else {
+            // 🔥 ซ่อนเมนูสมาชิก
+            document.getElementById("menuMembers").style.display = "none";
 
-  });
+            loadPage("join", null);
+          }
+        }
+      }
 
+      // ✅ ซ่อน Loading หลังเช็คเสร็จทุกกรณี
+      document.getElementById("loadingScreen").style.display = "none";
+    });
 }
 
-function registerLineUser(profile){
-
-  fetch(CONFIG.API_URL,{
-    method:"POST",
+function registerLineUser(profile) {
+  fetch(CONFIG.API_URL, {
+    method: "POST",
     body: JSON.stringify({
-      action:"registerLineUser",
+      action: "registerLineUser",
       userId: profile.userId,
       lineDisplayName: profile.displayName,
-      linePictureUrl: profile.pictureUrl
-    })
+      linePictureUrl: profile.pictureUrl,
+    }),
   });
-
 }
 
 function showRegisterForm(profile) {
+  mustCompleteProfile = true;
+
+  document.querySelector(".sidebar").style.display = "none";
+
+  // 🔥 ซ่อนปุ่ม
+  document.getElementById("menuToggle").style.display = "none";
+  document.querySelector(".floating-btn").style.display = "none";
 
   document.getElementById("pageContent").innerHTML = `
-  
-  <h2>สมัครสมาชิกครั้งแรก</h2>
+    <h2 class="register-title">กรอกข้อมูล3</h2>
 
-  <div class="card">
+    <div class="card">
 
-    <label>ชื่อเล่น</label>
-    <input id="nickName">
+  <label>ชื่อเล่น</label>
+  <input id="nickName">
 
-    <label>ชื่อจริง</label>
-    <input id="realName">
+  <label>ชื่อจริง</label>
+  <input id="realName">
 
-    <label>เบอร์โทรศัพท์</label>
-    <input id="phone">
+  <label>เบอร์โทรศัพท์</label>
+  <input id="phone" type="tel" maxlength="10">
+  <div id="phoneError" class="error-text"></div>
 
-    <label>วันเกิด</label>
-    <input id="birthday" type="date">
+  <label>วันเกิด</label>
+  <input id="birthday" type="date">
+  <div id="birthdayError" class="error-text"></div>
 
-    <label>ระดับมือ</label>
-    <select id="level">
-      <option value="Beginner">Beginner</option>
-      <option value="P">P</option>
-      <option value="P+">P+</option>
-      <option value="S">S</option>
-    </select>
+  <label>ระดับมือ</label>
+  <select id="level">
+    <option value="Beginner">Beginner</option>
+    <option value="S">S</option>
+    <option value="P">P</option>
+    <option value="P+">P+</option>
+  </select>
 
-    <button onclick="registerUser()" class="btn-primary">
-      บันทึกข้อมูล
-    </button>
+  <button onclick="registerUser()" class="btn-primary">
+    บันทึกข้อมูล
+  </button>
 
-  </div>
+</div>
   `;
 }
 
-function registerUser(){
+function registerUser() {
+  const nick = document.getElementById("nickName").value.trim();
+  const real = document.getElementById("realName").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const birthday = document.getElementById("birthday").value;
 
-  fetch(CONFIG.API_URL,{
-    method:"POST",
+  let valid = true;
+
+  // ล้าง error เก่า
+  document.getElementById("phoneError").innerText = "";
+  document.getElementById("birthdayError").innerText = "";
+
+  document.getElementById("phone").classList.remove("input-error");
+  document.getElementById("birthday").classList.remove("input-error");
+
+  if (!nick || !real || !phone || !birthday) {
+    alert("กรอกข้อมูลให้ครบก่อน");
+    return;
+  }
+
+  // ========================
+  // ตรวจเบอร์โทร
+  // ========================
+
+  const phoneRegex = /^0[0-9]{9}$/;
+
+  if (!phoneRegex.test(phone)) {
+    document.getElementById("phoneError").innerText = "กรอกเบอร์โทรให้ถูกต้อง";
+    document.getElementById("phone").classList.add("input-error");
+    valid = false;
+  }
+
+  // ========================
+  // ตรวจอายุขั้นต่ำ 6 ปี
+  // ========================
+
+  const birthDate = new Date(birthday);
+  const today = new Date();
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const month = today.getMonth() - birthDate.getMonth();
+
+  if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  if (age < 6) {
+    document.getElementById("birthdayError").innerText =
+      "กรุณาใส่อายุให้ถูกต้อง";
+    document.getElementById("birthday").classList.add("input-error");
+    valid = false;
+  }
+
+  // ถ้ามี error ไม่ต้องส่งข้อมูล
+  if (!valid) {
+    return;
+  }
+
+  // ========================
+  // ส่งข้อมูล
+  // ========================
+
+  document.getElementById("loadingScreen").style.display = "flex";
+
+  fetch(CONFIG.API_URL, {
+    method: "POST",
     body: JSON.stringify({
-      action:"registerUser",
+      action: "registerUser",
       userId: currentUser.userId,
       lineDisplayName: currentUser.displayName,
       linePictureUrl: currentUser.pictureUrl,
-      nickName: document.getElementById("nickName").value,
-      realName: document.getElementById("realName").value,
-      phone: document.getElementById("phone").value,
-      birthday: document.getElementById("birthday").value,
-      level: document.getElementById("level").value
-    })
+      nickName: nick,
+      realName: real,
+      phone: phone,
+      birthday: birthday,
+      level: document.getElementById("level").value,
+    }),
   })
-  .then(res=>res.json())
-  .then(res=>{
+    .then((res) => res.json())
+    .then((res) => {
+      if (res.success) {
+        mustCompleteProfile = false;
 
-    alert("สมัครสมาชิกสำเร็จ 🎉");
+        const sidebar = document.querySelector(".sidebar");
+        sidebar.style.display = "block"; // 🔥 คืนค่า
+        sidebar.classList.add("collapsed"); // พับไว้ก่อน
 
-    loadPage("members", document.querySelector(".menu li"));
+        document.getElementById("overlay").classList.remove("show");
 
-  });
+        document.getElementById("menuToggle").style.display = "inline-block";
+        document.querySelector(".floating-btn").style.display = "block";
 
+        document.getElementById("loadingScreen").style.display = "none";
+
+        loadPage("members", document.querySelector(".menu li"));
+      } else {
+        document.getElementById("loadingScreen").style.display = "none";
+        alert("เกิดข้อผิดพลาด");
+      }
+    })
+    .catch(() => {
+      document.getElementById("loadingScreen").style.display = "none";
+      alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    });
+}
+
+function joinSession() {
+  alert("TODO: เขียน API เข้าร่วมก๊วน");
 }

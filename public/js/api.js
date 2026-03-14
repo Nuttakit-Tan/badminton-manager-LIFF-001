@@ -1,8 +1,7 @@
 async function apiCall(action, params = {}) {
-
   const query = new URLSearchParams({
     action,
-    ...params
+    ...params,
   }).toString();
 
   const url = CONFIG.API_URL + "?" + query;
