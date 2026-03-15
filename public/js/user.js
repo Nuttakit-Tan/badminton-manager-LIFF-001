@@ -23,8 +23,8 @@ document.addEventListener("DOMContentLoaded", function () {
         setupSidebar();
       }, 0);
 
-      document.getElementById("username").innerText =
-        "สวัสดีคุณ " + profile.displayName;
+      document.getElementById("username").innerHTML =
+        `👋 สวัสดี, <strong>${profile.displayName}</strong>`;
 
       checkUser(profile.userId);
     });
@@ -217,7 +217,12 @@ function registerUser() {
 
         document.getElementById("loadingScreen").style.display = "none";
 
-        loadPage("members", document.querySelector(".menu li"));
+        if (res.role === "admin") {
+          loadPage("members", document.getElementById("menuMembers"));
+        } else {
+          document.getElementById("menuMembers").style.display = "none";
+          loadPage("join", null);
+        }
       } else {
         document.getElementById("loadingScreen").style.display = "none";
         alert("เกิดข้อผิดพลาด");
