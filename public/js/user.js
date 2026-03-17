@@ -86,10 +86,8 @@ function showRegisterForm(profile) {
 
   // 🔥 ซ่อนปุ่ม
   document.getElementById("menuToggle").style.display = "none";
-  document.querySelector(".floating-btn").style.display = "none";
-
   document.getElementById("pageContent").innerHTML = `
-    <h2 class="register-title">กรอกข้อมูล3</h2>
+    <h2 class="register-title">กรอกข้อมูล 5</h2>
 
     <div class="card">
 
@@ -207,22 +205,28 @@ function registerUser() {
         mustCompleteProfile = false;
 
         const sidebar = document.querySelector(".sidebar");
-        sidebar.style.display = "block"; // 🔥 คืนค่า
-        sidebar.classList.add("collapsed"); // พับไว้ก่อน
+        sidebar.style.display = "block";
+        sidebar.classList.add("collapsed");
 
         document.getElementById("overlay").classList.remove("show");
-
         document.getElementById("menuToggle").style.display = "inline-block";
-        document.querySelector(".floating-btn").style.display = "block";
 
-        document.getElementById("loadingScreen").style.display = "none";
+        // 🔥 ล้างหน้า register ทันที (กันเด้งกลับ)
+        document.getElementById("pageContent").innerHTML = "";
 
-        if (res.role === "admin") {
-          loadPage("members", document.getElementById("menuMembers"));
-        } else {
-          document.getElementById("menuMembers").style.display = "none";
-          loadPage("join", null);
-        }
+        // 🔥 แสดง loading สั้น ๆ ให้ transition นุ่ม
+        document.getElementById("loadingScreen").style.display = "flex";
+
+        setTimeout(() => {
+          document.getElementById("loadingScreen").style.display = "none";
+
+          if (res.role === "admin") {
+            loadPage("members", document.getElementById("menuMembers"));
+          } else {
+            document.getElementById("menuMembers").style.display = "none";
+            loadPage("join", null);
+          }
+        }, 200); // delay เล็กน้อยพอ
       } else {
         document.getElementById("loadingScreen").style.display = "none";
         alert("เกิดข้อผิดพลาด");

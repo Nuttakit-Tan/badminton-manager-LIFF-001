@@ -28,7 +28,7 @@
     <div class="sidebar">
       <div class="logo">
   <img src="images/logo.png" class="sidebar-logo" />
-  <p>Badminton Manager ทดสอบครั้งที่ 21</p>
+  <p>Badminton Manager ทดสอบครั้งที่ 27</p>
 </div>
 
       <ul class="menu">
@@ -49,7 +49,7 @@
   <!-- ตรงนี้สำคัญ -->
   <div id="pageContent"></div>
 
-  <button class="floating-btn" onclick="showAddForm()">+</button>
+  <!-- <button class="floating-btn" onclick="showAddForm()">+</button>-->
 </div>
 
   </div>
@@ -72,10 +72,12 @@
     <input id="newReal">
 
     <label>เบอร์โทร</label>
-    <input id="newPhone">
+<input id="newPhone" type="tel" maxlength="10">
+<div id="newPhoneError" class="error-text"></div>
 
     <label>วันเกิด</label>
-    <input id="newBirth" type="date">
+<input id="newBirth" type="date">
+<div id="newBirthError" class="error-text"></div>
 
     <label>ระดับมือ</label>
     <select id="newLevel">
@@ -92,5 +94,35 @@
 
   </div>
 </div>
+
+<div id="shuttleModal" class="modal">
+  <div class="modal-box" id="shuttleModalContent"></div>
+</div>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-box">
+    <h3 id="confirmTitle">ยืนยันการลบ</h3>
+    <p id="confirmMessage"></p>
+
+    <div class="modal-actions">
+      <button id="confirmBtn" class="btn-primary">ยืนยัน</button>
+      <button onclick="closeConfirm()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" style="
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#43a047;
+  color:white;
+  padding:12px 20px;
+  border-radius:12px;
+  display:none;
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+  z-index:9999;">
+</div>
+
 </body>
 </html>
