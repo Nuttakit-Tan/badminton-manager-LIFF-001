@@ -5,7 +5,9 @@
   <title>Badminton Manager</title>
 
   <link rel="stylesheet" href="css/style.css">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
@@ -81,11 +83,13 @@
 
     <label>ระดับมือ</label>
     <select id="newLevel">
-      <option>Beginner</option>
-      <option>P</option>
-      <option>P+</option>
-      <option>S</option>
-    </select>
+  <option>BG</option>
+  <option>BG+</option>
+  <option>S</option>
+  <option>S+</option>
+  <option>P</option>
+  <option>P+</option>
+</select>
 
     <div class="modal-actions">
       <button onclick="addMember()" class="btn-primary">บันทึก</button>
@@ -122,6 +126,27 @@
   display:none;
   box-shadow:0 8px 20px rgba(0,0,0,0.2);
   z-index:9999;">
+</div>
+<div id="participantModal" class="modal">
+  <div class="modal-box">
+
+    <h3>เลือกสมาชิก</h3>
+    <input type="text"
+       placeholder="ค้นหาชื่อ..."
+       oninput="searchParticipant(this.value)"
+       style="width:100%; margin-bottom:10px;">
+    <div id="participantSelectList"></div>
+
+    <div id="participantPagination" style="margin-top:10px;"></div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="saveSelectedParticipants()">
+        บันทึก
+      </button>
+      <button onclick="closeParticipantModal()">ยกเลิก</button>
+    </div>
+
+  </div>
 </div>
 
 </body>

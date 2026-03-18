@@ -5,6 +5,12 @@ let currentLots = [];
 let currentProductId = null;
 let currentProducts = [];
 let requestLock = false;
+let currentSessionId = null;
+let participantUsers = [];
+let participantPage = 1;
+const participantPerPage = 10;
+let currentMaxPlayer = null;
+let currentCount = 0;
 
 function setupSidebar() {
   const sidebar = document.querySelector(".sidebar");
@@ -58,7 +64,7 @@ function loadPage(page, el) {
   </div>
 
   <button class="add-btn" onclick="showAddForm()">
-    <span class="material-icons">add</span>
+    <span class="material-symbols-outlined">add</span>
   </button>
 </div>
 
@@ -84,16 +90,71 @@ function loadPage(page, el) {
     <h2>เข้าร่วมก๊วน</h2>
 
     <div class="card">
-      <p>กดปุ่มเพื่อเข้าร่วมรอบวันนี้</p>
-      <button class="btn-primary" onclick="joinSession()">
+      <button class="btn-primary" onclick="joinCurrentSession()">
         เข้าร่วม
       </button>
     </div>
   `;
+
+      loadCurrentSession();
     }
 
     if (page === "session") {
-      pageContent.innerHTML = "<h2>หน้าจัดก๊วน</h2>";
+      pageContent.innerHTML = `
+    <div class="member-page">
+
+      <div class="page-header">
+        <h2>จัดตั้งก๊วน</h2>
+        <p class="page-sub">สร้างรอบเล่นแบด</p>
+      </div>
+
+      <div class="card" style="max-width:600px; margin-top:20px;">
+
+        <label>ชื่อก๊วน</label>
+        <input id="sessionName">
+
+        <label>วันที่</label>
+        <input id="sessionDate" type="date">
+
+        <label>เวลาเริ่ม</label>
+        <input id="sessionTime" type="time">
+
+        <label>ลูกที่ใช้ (ค่าเริ่มต้น)</label>
+        <select id="sessionShuttle"></select>
+
+        <label>จำนวนสนาม</label>
+        <input id="courtCount" type="number" min="1" value="1">
+
+        <label>รูปแบบรับผู้เล่น</label>
+        <select id="limitType" onchange="toggleLimitInput()">
+          <option value="unlimited">ไม่จำกัด</option>
+          <option value="limited">จำกัดจำนวน</option>
+        </select>
+
+        <div id="limitInputBox" style="display:none;">
+          <label>จำนวนสูงสุด</label>
+          <input id="maxPlayer" type="number" min="1">
+        </div>
+
+        <label>ค่าสนามต่อคน (บาท)</label>
+        <input id="entryFee" type="number" min="0">
+
+        <button onclick="createSession()" class="btn-primary">
+          สร้างก๊วน
+        </button>
+
+        <div style="margin-top:15px;">
+  <button onclick="closeCurrentSession()" 
+          class="btn-danger-sm">
+    ปิดก๊วน
+  </button>
+</div>
+
+      </div>
+    </div>
+  `;
+
+      loadSessionProducts();
     }
 
     if (page === "shuttle") {
@@ -107,7 +168,7 @@ function loadPage(page, el) {
         </div>
 
         <button class="add-btn" onclick="showAddProduct()">
-          <span class="material-icons">add</span>
+          <span class="material-symbols-outlined">add</span>
         </button>
       </div>
 
@@ -181,7 +242,7 @@ function renderMembers(users) {
       u.isLineUser && u.linePictureUrl
         ? `<img src="${u.linePictureUrl}" class="avatar">`
         : `<div class="avatar placeholder">
-            <span class="material-icons">person</span>
+            <span class="material-symbols-outlined">person</span>
           </div>`;
 
     html += `
@@ -198,8 +259,8 @@ function renderMembers(users) {
           </div>
 
           <div class="member-actions">
-            <span class="material-icons edit" onclick="editUser('${u.userId}')">edit</span>
-            <span class="material-icons delete" onclick="removeUser('${u.userId}')">delete</span>
+            <span class="material-symbols-outlined edit" onclick="editUser('${u.userId}')">edit</span>
+            <span class="material-symbols-outlined delete" onclick="removeUser('${u.userId}')">delete</span>
           </div>
 
         </div>
@@ -208,7 +269,7 @@ function renderMembers(users) {
           <div class="info-grid">
 
             <div class="info-item">
-              <span class="material-icons">cake</span>
+              <span class="material-symbols-outlined">cake</span>
               <div>
                 <label>อายุ</label>
                 <p>${age || "-"} ปี</p>
@@ -216,7 +277,7 @@ function renderMembers(users) {
             </div>
 
             <div class="info-item">
-              <span class="material-icons">phone</span>
+              <span class="material-symbols-outlined">phone</span>
               <div>
                 <label>โทรศัพท์</label>
                 <p>${u.phone || "-"}</p>
@@ -224,7 +285,7 @@ function renderMembers(users) {
             </div>
 
             <div class="info-item">
-              <span class="material-icons">emoji_events</span>
+              <span class="material-symbols-outlined">emoji_events</span>
               <div>
                 <label>คะแนน</label>
                 <p>${u.point || 0}</p>
@@ -232,7 +293,7 @@ function renderMembers(users) {
             </div>
 
             <div class="info-item">
-              <span class="material-icons">sports_tennis</span>
+              <span class="material-symbols-outlined">sports_tennis</span>
               <div>
                 <label>ระดับ</label>
                 <span class="badge ${getLevelClass(u.level)}">
@@ -291,14 +352,20 @@ function calculateAge(birthday) {
 
 function getLevelClass(level) {
   switch (level) {
-    case "S":
-      return "badge-s";
     case "P+":
       return "badge-pplus";
     case "P":
       return "badge-p";
+    case "S+":
+      return "badge-splus";
+    case "S":
+      return "badge-s";
+    case "BG+":
+      return "badge-bgplus";
+    case "BG":
+      return "badge-bg";
     default:
-      return "badge-beginner";
+      return "badge-bg";
   }
 }
 
@@ -324,6 +391,15 @@ async function removeUser(userId) {
 }
 
 async function addMember() {
+  if (requestLock) return; // 🔥 กันกดซ้ำ
+  requestLock = true;
+
+  const btn = document.querySelector("#memberModal .btn-primary");
+  const originalText = btn.innerText;
+
+  btn.innerText = "กำลังบันทึก...";
+  btn.disabled = true;
+
   const nick = document.getElementById("newNick").value.trim();
   const real = document.getElementById("newReal").value.trim();
   const phone = document.getElementById("newPhone").value.trim();
@@ -331,21 +407,17 @@ async function addMember() {
 
   let valid = true;
 
-  // ล้าง error เก่า
   document.getElementById("newPhoneError").innerText = "";
   document.getElementById("newBirthError").innerText = "";
-
   document.getElementById("newPhone").classList.remove("input-error");
   document.getElementById("newBirth").classList.remove("input-error");
 
   if (!nick || !real || !phone || !birth) {
     alert("กรอกข้อมูลให้ครบก่อน");
-    return;
+    valid = false;
   }
 
-  // 🔥 ตรวจเบอร์โทร
   const phoneRegex = /^0[0-9]{9}$/;
-
   if (!phoneRegex.test(phone)) {
     document.getElementById("newPhoneError").innerText =
       "กรอกเบอร์โทรให้ถูกต้อง (10 หลัก)";
@@ -353,13 +425,10 @@ async function addMember() {
     valid = false;
   }
 
-  // 🔥 ตรวจอายุขั้นต่ำ 6 ปี
   const birthDate = new Date(birth);
   const today = new Date();
-
   let age = today.getFullYear() - birthDate.getFullYear();
   const month = today.getMonth() - birthDate.getMonth();
-
   if (month < 0 || (month === 0 && today.getDate() < birthDate.getDate())) {
     age--;
   }
@@ -371,31 +440,43 @@ async function addMember() {
     valid = false;
   }
 
-  if (!valid) return;
-
-  // 🔥 ส่งข้อมูล
-  const res = await fetch(CONFIG.API_URL, {
-    method: "POST",
-    body: JSON.stringify({
-      action: editingUserId ? "updateUser" : "addManualUser",
-      userId: editingUserId,
-      nickName: nick,
-      realName: real,
-      phone: phone,
-      birthday: birth,
-      level: document.getElementById("newLevel").value,
-    }),
-  });
-
-  const data = await res.json();
-
-  if (data.success) {
-    alert("บันทึกสำเร็จ");
-    closeModal();
-    loadMembers();
-  } else {
-    alert("เกิดข้อผิดพลาด");
+  if (!valid) {
+    btn.innerText = originalText;
+    btn.disabled = false;
+    requestLock = false;
+    return;
   }
+
+  try {
+    const res = await fetch(CONFIG.API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: editingUserId ? "updateUser" : "addManualUser",
+        userId: editingUserId,
+        nickName: nick,
+        realName: real,
+        phone: phone,
+        birthday: birth,
+        level: document.getElementById("newLevel").value,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showToast("บันทึกสำเร็จ");
+      closeModal();
+      loadMembers();
+    } else {
+      alert("เกิดข้อผิดพลาด");
+    }
+  } catch (err) {
+    alert("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+  }
+
+  btn.innerText = originalText;
+  btn.disabled = false;
+  requestLock = false;
 }
 
 function handleSearch() {
@@ -891,4 +972,431 @@ async function updateLot(lotId) {
   showToast("แก้ไข Lot สำเร็จ");
 
   selectProduct();
+}
+
+function toggleLimitInput() {
+  const type = document.getElementById("limitType").value;
+  document.getElementById("limitInputBox").style.display =
+    type === "limited" ? "block" : "none";
+}
+
+async function loadSessionProducts() {
+  const select = document.getElementById("sessionShuttle");
+
+  const res = await apiCall("getShuttleProducts");
+
+  select.innerHTML = `<option value="">-- เลือกลูกแบด --</option>`;
+
+  if (!res.products) return;
+
+  res.products.forEach((p) => {
+    select.innerHTML += `
+      <option value="${p.productId}">
+        ${p.brand} ${p.model}
+      </option>
+    `;
+  });
+}
+
+async function createSession() {
+  if (requestLock) return;
+  requestLock = true;
+
+  const btn = document.querySelector("#pageContent .btn-primary");
+  btn.innerText = "กำลังสร้าง...";
+  btn.disabled = true;
+
+  const data = {
+    action: "createSession",
+    name: document.getElementById("sessionName").value,
+    date: document.getElementById("sessionDate").value,
+    startTime: document.getElementById("sessionTime").value,
+    shuttleId: document.getElementById("sessionShuttle").value,
+    courtCount: document.getElementById("courtCount").value,
+    limitType: document.getElementById("limitType").value,
+    maxPlayer: document.getElementById("maxPlayer").value,
+    entryFee: document.getElementById("entryFee").value,
+    createdBy: currentUser.userId,
+  };
+
+  const res = await fetch(CONFIG.API_URL, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    currentSessionId = result.sessionId; // ต้องให้ backend ส่งกลับมา
+
+    showToast("สร้างก๊วนสำเร็จ");
+
+    renderWaitingRoom(); // 👈 เพิ่มตรงนี้
+  } else {
+    alert("เกิดข้อผิดพลาด");
+  }
+
+  btn.innerText = "สร้างก๊วน";
+  btn.disabled = false;
+  requestLock = false;
+}
+
+async function loadCurrentSession() {
+  const res = await apiCall("getLatestSession");
+
+  if (res.session) {
+    currentSessionId = res.session.sessionId;
+  }
+}
+
+async function joinCurrentSession() {
+  if (!currentSessionId) {
+    alert("ยังไม่มีก๊วนเปิดอยู่");
+    return;
+  }
+
+  const res = await fetch(CONFIG.API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "joinSession",
+      sessionId: currentSessionId,
+      userId: currentUser.userId,
+      isAdmin: false,
+    }),
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    showToast("เข้าร่วมสำเร็จ");
+  } else {
+    alert(result.message);
+  }
+}
+
+async function closeCurrentSession() {
+  if (!currentSessionId) {
+    alert("ยังไม่มีก๊วน");
+    return;
+  }
+
+  const res = await fetch(CONFIG.API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "closeSession",
+      sessionId: currentSessionId,
+    }),
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    showToast("ปิดก๊วนเรียบร้อย");
+  } else {
+    alert("ปิดก๊วนไม่สำเร็จ");
+  }
+}
+
+async function loadCurrentSession() {
+  const res = await apiCall("getLatestSession");
+
+  if (res.session) {
+    currentSessionId = res.session.sessionId;
+  } else {
+    currentSessionId = null;
+  }
+}
+
+function renderWaitingRoom() {
+  const pageContent = document.getElementById("pageContent");
+
+  pageContent.innerHTML = `
+    <div class="member-page">
+
+      <div class="page-header header-flex">
+        <div>
+          <h2>รอสมาชิกเข้าร่วม</h2>
+          <div id="playerCountInfo" style="margin-top:5px; font-weight:600;"></div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button onclick="openAddParticipantModal()" class="btn-primary-sm">
+            + เพิ่มสมาชิก
+          </button>
+          <button onclick="startSession()" class="btn-primary-sm">
+            เริ่มเล่น
+          </button>
+          <button onclick="cancelSession()" class="btn-danger-sm">
+            ยกเลิกก๊วน
+          </button>
+        </div>
+      </div>
+
+      <div id="participantTable" style="margin-top:20px;"></div>
+
+    </div>
+  `;
+
+  loadParticipants();
+  updateSessionInfo();
+}
+
+async function loadParticipants() {
+  const container = document.getElementById("participantTable");
+
+  // 🔵 แสดง 3 จุดโหลดก่อน
+  container.innerHTML = `
+    <div style="display:flex; justify-content:center; padding:30px;">
+      <div class="dot-loader">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  `;
+
+  const res = await apiCall("getParticipants", {
+    sessionId: currentSessionId,
+  });
+
+  let html = `
+  <table class="waiting-table">
+    <thead>
+      <tr>
+        <th class="col-name">ชื่อ</th>
+        <th class="col-status">สถานะ</th>
+      </tr>
+    </thead>
+    <tbody>
+`;
+
+  if (!res.participants || res.participants.length === 0) {
+    html += `
+    <tr>
+      <td colspan="2" class="empty-row">
+        ยังไม่มีผู้เข้าร่วม
+      </td>
+    </tr>
+  `;
+  } else {
+    res.participants.forEach((p) => {
+      html += `
+      <tr>
+        <td class="col-name">${p.nickName}</td>
+        <td class="col-status">
+          <span class="status-badge">${p.status}</span>
+        </td>
+      </tr>
+    `;
+    });
+  }
+
+  html += `
+    </tbody>
+  </table>
+`;
+
+  container.innerHTML = html;
+}
+
+async function addParticipantManual() {
+  const userId = prompt("ใส่ userId ที่ต้องการเพิ่ม");
+
+  if (!userId) return;
+
+  const res = await fetch(CONFIG.API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "joinSession",
+      sessionId: currentSessionId,
+      userId: userId,
+      isAdmin: true,
+    }),
+  });
+
+  const result = await res.json();
+
+  if (result.success) {
+    loadParticipants();
+  } else {
+    alert(result.message);
+  }
+}
+
+async function startSession() {
+  await fetch(CONFIG.API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "startSession",
+      sessionId: currentSessionId,
+    }),
+  });
+
+  renderPlayingRoom();
+}
+
+async function cancelSession() {
+  await fetch(CONFIG.API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "cancelSession",
+      sessionId: currentSessionId,
+    }),
+  });
+
+  loadPage("session");
+}
+
+async function openAddParticipantModal() {
+  await updateSessionInfo();
+  const userRes = await apiCall("getUsers");
+  const participantRes = await apiCall("getParticipants", {
+    sessionId: currentSessionId,
+  });
+
+  const joinedIds = participantRes.participants.map((p) => p.userId);
+
+  // 🔥 ตัดคนที่อยู่ในก๊วนแล้วออก
+  participantUsers = (userRes.users || []).filter(
+    (u) => !joinedIds.includes(u.userId),
+  );
+
+  participantPage = 1;
+
+  renderParticipantPage();
+
+  document.getElementById("participantModal").style.display = "flex";
+}
+
+function renderParticipantPage() {
+  const list = document.getElementById("participantSelectList");
+  const pagination = document.getElementById("participantPagination");
+
+  const start = (participantPage - 1) * participantPerPage;
+  const end = start + participantPerPage;
+
+  const pageUsers = participantUsers.slice(start, end);
+
+  let html = "";
+
+  pageUsers.forEach((u) => {
+    html += `
+    <div class="select-row">
+      <div class="select-info">
+        <div class="select-name">${u.nickName}</div>
+        <div class="select-level">${u.level}</div>
+      </div>
+      <div>
+        <input type="checkbox" value="${u.userId}">
+      </div>
+    </div>
+  `;
+  });
+
+  list.innerHTML = html;
+
+  // Pagination
+  const totalPages = Math.ceil(participantUsers.length / participantPerPage);
+
+  let pHtml = "";
+
+  for (let i = 1; i <= totalPages; i++) {
+    pHtml += `
+      <button class="page-btn ${i === participantPage ? "active" : ""}"
+        onclick="changeParticipantPage(${i})">
+        ${i}
+      </button>
+    `;
+  }
+
+  pagination.innerHTML = pHtml;
+}
+
+function changeParticipantPage(page) {
+  participantPage = page;
+  renderParticipantPage();
+}
+
+function closeParticipantModal() {
+  document.getElementById("participantModal").style.display = "none";
+}
+
+async function saveSelectedParticipants() {
+  const checked = document.querySelectorAll(
+    '#participantSelectList input[type="checkbox"]:checked',
+  );
+
+  if (checked.length === 0) {
+    alert("กรุณาเลือกสมาชิก");
+    return;
+  }
+
+  const userIds = [];
+
+  checked.forEach((cb) => {
+    userIds.push(cb.value);
+  });
+
+  const totalAfterAdd = currentCount + userIds.length;
+
+  if (currentMaxPlayer && totalAfterAdd > currentMaxPlayer) {
+    alert(`จำนวนเกิน ${currentMaxPlayer} คน`);
+    return;
+  }
+
+  await fetch(CONFIG.API_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "addMultipleParticipants",
+      sessionId: currentSessionId,
+      userIds: userIds,
+    }),
+  });
+
+  closeParticipantModal();
+
+  await loadParticipants(); // โหลดรายชื่อใหม่
+  await updateSessionInfo();
+}
+
+async function updateSessionInfo() {
+  const res = await apiCall("getLatestSession");
+
+  if (!res.session) return;
+
+  currentMaxPlayer = res.session.maxPlayer;
+  currentCount = res.session.currentCount;
+
+  const el = document.getElementById("playerCountInfo");
+
+  if (currentMaxPlayer) {
+    el.innerHTML = `จำนวนสมาชิก: ${currentCount} / ${currentMaxPlayer}`;
+  } else {
+    el.innerHTML = `จำนวนสมาชิก: ${currentCount}`;
+  }
+}
+
+function searchParticipant(keyword) {
+  keyword = keyword.toLowerCase();
+
+  const filtered = participantUsers.filter(
+    (u) =>
+      (u.nickName || "").toLowerCase().includes(keyword) ||
+      (u.realName || "").toLowerCase().includes(keyword),
+  );
+
+  const list = document.getElementById("participantSelectList");
+
+  let html = "";
+
+  filtered.slice(0, participantPerPage).forEach((u) => {
+    html += `
+      <div style="margin-bottom:8px;">
+        <label>
+          <input type="checkbox" value="${u.userId}">
+          ${u.nickName} (${u.level})
+        </label>
+      </div>
+    `;
+  });
+
+  list.innerHTML = html;
 }

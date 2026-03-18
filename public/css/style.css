@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: "Prompt", sans-serif;
   background: #f4f1ee;
 }
 
@@ -690,4 +690,125 @@ body {
 
 .btn-danger-sm:hover {
   background: #f8d7da;
+}
+
+.badge-bg {
+  background: #43a047;
+}
+
+.badge-bgplus {
+  background: #66bb6a;
+}
+
+.badge-s {
+  background: #1e88e5;
+}
+
+.badge-splus {
+  background: #42a5f5;
+}
+
+.badge-p {
+  background: #fb8c00;
+}
+
+.badge-pplus {
+  background: #e53935;
+}
+
+.waiting-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.waiting-table thead {
+  background: #f4f1ee;
+}
+
+.waiting-table th {
+  text-align: left;
+  padding: 12px;
+  font-weight: 600;
+}
+
+.waiting-table td {
+  padding: 12px;
+  border-top: 1px solid #eee;
+}
+
+.col-name {
+  width: 70%;
+}
+
+.col-status {
+  width: 30%;
+}
+
+.status-badge {
+  background: #e07a5f;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.empty-row {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+}
+
+.select-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.select-row:hover {
+  background: #f9f9f9;
+}
+
+.select-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.select-name {
+  font-weight: 600;
+}
+
+.select-level {
+  font-size: 13px;
+  color: #888;
+}
+
+.select-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.select-row:hover {
+  background: #f9f9f9;
+}
+
+.select-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.select-name {
+  font-weight: 600;
+}
+
+.select-level {
+  font-size: 13px;
+  color: #888;
 }

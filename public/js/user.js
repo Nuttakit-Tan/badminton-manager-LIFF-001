@@ -51,14 +51,7 @@ function checkUser(userId) {
         } else {
           mustCompleteProfile = false;
 
-          if (res.role === "admin") {
-            loadPage("members", document.getElementById("menuMembers"));
-          } else {
-            // 🔥 ซ่อนเมนูสมาชิก
-            document.getElementById("menuMembers").style.display = "none";
-
-            loadPage("join", null);
-          }
+          routeBySession(res.role);
         }
       }
 
@@ -107,11 +100,13 @@ function showRegisterForm(profile) {
 
   <label>ระดับมือ</label>
   <select id="level">
-    <option value="Beginner">Beginner</option>
-    <option value="S">S</option>
-    <option value="P">P</option>
-    <option value="P+">P+</option>
-  </select>
+  <option value="BG">BG</option>
+  <option value="BG+">BG+</option>
+  <option value="S">S</option>
+  <option value="S+">S+</option>
+  <option value="P">P</option>
+  <option value="P+">P+</option>
+</select>
 
   <button onclick="registerUser()" class="btn-primary">
     บันทึกข้อมูล
@@ -220,12 +215,7 @@ function registerUser() {
         setTimeout(() => {
           document.getElementById("loadingScreen").style.display = "none";
 
-          if (res.role === "admin") {
-            loadPage("members", document.getElementById("menuMembers"));
-          } else {
-            document.getElementById("menuMembers").style.display = "none";
-            loadPage("join", null);
-          }
+          routeBySession(res.role);
         }, 200); // delay เล็กน้อยพอ
       } else {
         document.getElementById("loadingScreen").style.display = "none";
@@ -240,4 +230,43 @@ function registerUser() {
 
 function joinSession() {
   alert("TODO: เขียน API เข้าร่วมก๊วน");
+}
+
+async function routeBySession(role){
+
+  const response = await fetch(CONFIG.API_URL + "?action=getLatestSession");
+  const data = await response.json();
+
+  if(!data.session){
+
+    if(role === "admin"){
+      loadPage("session");
+    }else{
+      document.getElementById("menuMembers").style.display = "none";
+      loadPage("join");
+    }
+
+    return;
+  }
+
+  currentSessionId = data.session.sessionId;
+  const status = data.session.status;
+
+  if(status === "open"){
+    renderWaitingRoom();
+  }
+
+  else if(status === "playing"){
+    renderPlayingRoom();
+  }
+
+  else if(status === "closed"){
+
+    if(role === "admin"){
+      loadPage("session");
+    }else{
+      document.getElementById("menuMembers").style.display = "none";
+      loadPage("join");
+    }
+  }
 }
