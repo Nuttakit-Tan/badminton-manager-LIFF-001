@@ -812,3 +812,244 @@ body {
   font-size: 13px;
   color: #888;
 }
+
+.btn-remove {
+  margin-left: 10px;
+  border: none;
+  background: #f44336;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-remove {
+  margin-left: 10px;
+  border: none;
+  background: #f44336;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-primary-sm,
+.btn-danger-sm,
+.btn-outline-sm {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-outline-sm {
+  border: 1px solid #e07a5f;
+  background: transparent;
+  color: #e07a5f;
+}
+
+.status-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-remove {
+  border: none;
+  background: #f44336;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-remove:hover {
+  opacity: 0.85;
+}
+
+.session-form-card {
+  max-width: 600px;
+  margin-top: 20px;
+  padding: 25px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #ff7a59;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.15);
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* ปุ่ม */
+.form-actions {
+  margin-top: 25px;
+  display: flex;
+  gap: 12px;
+}
+
+.btn-primary {
+  flex: 1;
+  background: #ff7a59;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #e66546;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: #f2f2f2;
+  color: #333;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+.session-form-card {
+  max-width: 600px;
+  margin-top: 20px;
+  padding: 25px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #ff7a59;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.15);
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* ปุ่ม */
+.form-actions {
+  margin-top: 25px;
+  display: flex;
+  gap: 12px;
+}
+
+.btn-primary {
+  flex: 1;
+  background: #ff7a59;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #e66546;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: #f2f2f2;
+  color: #333;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+.edit-mode h2 {
+  color: #e07a5f;
+}
+
+.edit-mode .card {
+  border: 2px solid #f4a261;
+}
+
+.edit-badge {
+  background: #e07a5f;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}

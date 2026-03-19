@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css">
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
@@ -35,7 +34,7 @@
 
       <ul class="menu">
   <li id="menuMembers" onclick="loadPage('members', this)">รายชื่อ</li>
-  <li onclick="loadPage('session', this)">จัดก๊วน</li>
+  <li onclick="openSessionPage(this)">จัดก๊วน</li>
   <li onclick="loadPage('shuttle', this)">ลูกแบด</li>
   <li onclick="loadPage('history', this)">ประวัติ</li>
   <li onclick="loadPage('payment', this)">ชำระเงิน</li>
@@ -57,10 +56,23 @@
   </div>
 
   <script src="js/config.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/liff-init.js"></script>
-  <script src="js/page.js"></script> 
-  <script src="js/user.js"></script>
+<script src="js/api.js"></script>
+
+<!-- Global State -->
+<script src="js/state.js"></script>
+
+<!-- Layout & Routing -->
+<script src="js/layout.js"></script>
+
+<!-- Modules -->
+<script src="js/members.js"></script>
+<script src="js/shuttle.js"></script>
+<script src="js/session.js"></script>
+<script src="js/participants.js"></script>
+
+<!-- User & LIFF -->
+<script src="js/liff-init.js"></script>
+<script src="js/user.js"></script>
   
 <div id="memberModal" class="modal">
   <div class="modal-box">
@@ -140,9 +152,11 @@
     <div id="participantPagination" style="margin-top:10px;"></div>
 
     <div class="modal-actions">
-      <button class="btn-primary" onclick="saveSelectedParticipants()">
-        บันทึก
-      </button>
+      <button id="saveParticipantBtn"
+        class="btn-primary"
+        onclick="saveSelectedParticipants()">
+  บันทึก
+</button>
       <button onclick="closeParticipantModal()">ยกเลิก</button>
     </div>
 
